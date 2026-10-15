@@ -1,0 +1,57 @@
+version: 2
+
+models:
+  - name: int_transactions
+    description: "Transações enriquecidas com dados do cliente e com as regras de negócio aplicadas. Calcula o valor financeiro bruto e os valores com sinal, onde compra soma e venda subtrai, base para o cálculo de posição."
+    columns:
+      - name: transaction_id
+        description: "Identificador único da transação."
+        data_tests:
+          - not_null
+          - unique
+      - name: transaction_date
+        description: "Data em que a transação foi realizada."
+        data_tests:
+          - not_null
+      - name: client_id
+        description: "Identificador do cliente que realizou a transação."
+        data_tests:
+          - not_null
+      - name: client_name
+        description: "Nome do cliente. Nulo indica transação de cliente inexistente no cadastro, o que quebra o teste."
+        data_tests:
+          - not_null
+      - name: client_city
+        description: "Cidade do cliente."
+      - name: client_state
+        description: "UF do cliente."
+      - name: asset_ticker
+        description: "Código de negociação do ativo na B3."
+        data_tests:
+          - not_null
+      - name: operation
+        description: "Tipo de operação: BUY ou SELL."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['BUY', 'SELL']
+      - name: quantity
+        description: "Quantidade negociada, sempre positiva."
+        data_tests:
+          - positive_value
+      - name: unit_price
+        description: "Preço unitário do ativo, em reais."
+        data_tests:
+          - positive_value
+      - name: gross_amount
+        description: "Valor financeiro bruto da transação (quantity x unit_price), em reais, sempre positivo."
+        data_tests:
+          - positive_value
+      - name: signed_quantity
+        description: "Quantidade com sinal da operação: positiva em BUY, negativa em SELL."
+        data_tests:
+          - not_null
+      - name: signed_amount
+        description: "Valor financeiro com sinal da operação: positivo em BUY, negativo em SELL, em reais."
+        data_tests:
+          - not_null
