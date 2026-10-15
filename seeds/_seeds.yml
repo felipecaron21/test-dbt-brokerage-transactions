@@ -3,6 +3,18 @@ version: 2
 seeds:
   - name: transactions
     description: "Dado bruto de transações de compra e venda de ativos por cliente, carregado do CSV de origem sem tratamento. Contém problemas de qualidade conhecidos, sinalizados pelos testes com severidade warn."
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - client_id
+              - asset_ticker
+              - operation
+              - quantity
+              - unit_price
+              - transaction_date
+          config:
+            severity: warn
     columns:
       - name: transaction_id
         description: "Identificador da transação na origem."
@@ -28,14 +40,14 @@ seeds:
                 severity: warn
 
       - name: asset_ticker
-        description: "Código de negociação do ativo."
+        description: "Código de negociação do ativo na B3."
         data_tests:
           - not_null:
               config:
                 severity: warn
 
       - name: operation
-        description: "Tipo de operação (BUY / SELL)."
+        description: "Tipo de operação: BUY para compra, SELL para venda."
         data_tests:
           - not_null:
               config:
@@ -52,11 +64,17 @@ seeds:
           - not_null:
               config:
                 severity: warn
+          - positive_value:
+              config:
+                severity: warn
 
       - name: unit_price
-        description: "Preço unitário do ativo na transação."
+        description: "Preço unitário do ativo na transação, em reais."
         data_tests:
           - not_null:
+              config:
+                severity: warn
+          - positive_value:
               config:
                 severity: warn
 
