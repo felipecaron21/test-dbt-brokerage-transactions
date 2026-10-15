@@ -1,0 +1,81 @@
+version: 2
+
+models:
+  - name: stg_clients
+    description: "Clientes limpos e tipados, com um registro por client_id. Duplicados resolvidos priorizando o registro com cidade preenchida."
+    columns:
+      - name: client_id
+        description: "Identificador único do cliente."
+        data_tests:
+          - not_null
+          - unique
+      - name: client_name
+        description: "Nome completo do cliente."
+        data_tests:
+          - not_null
+      - name: city
+        description: "Cidade de residência do cliente."
+        data_tests:
+          - not_null
+      - name: state
+        description: "Sigla da unidade federativa do cliente, em maiúsculas."
+        data_tests:
+          - not_null
+      - name: created_at
+        description: "Data de cadastro do cliente."
+        data_tests:
+          - not_null
+
+  - name: stg_transactions
+    description: "Transações limpas e tipadas. Remove registros sem cliente, com quantidade ou preço não positivos e com operação fora de BUY/SELL."
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - client_id
+              - asset_ticker
+              - operation
+              - quantity
+              - unit_price
+              - transaction_date
+          config:
+            severity: warn
+    columns:
+      - name: transaction_id
+        description: "Identificador único da transação."
+        data_tests:
+          - not_null
+          - unique
+      - name: client_id
+        description: "Identificador do cliente que realizou a transação."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_clients')
+                field: client_id
+      - name: asset_ticker
+        description: "Código de negociação do ativo na B3, em maiúsculas."
+        data_tests:
+          - not_null
+      - name: operation
+        description: "Tipo de operação: BUY para compra, SELL para venda."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['BUY', 'SELL']
+      - name: quantity
+        description: "Quantidade de ativos negociada, sempre positiva."
+        data_tests:
+          - not_null
+          - positive_value
+      - name: unit_price
+        description: "Preço unitário do ativo na transação, em reais."
+        data_tests:
+          - not_null
+          - positive_value
+      - name: transaction_date
+        description: "Data em que a transação foi realizada."
+        data_tests:
+          - not_null
