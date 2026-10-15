@@ -1,0 +1,12 @@
+version: 2
+
+macros:
+  - name: clean_string
+    description: "Padroniza colunas de texto da origem. Remove espaços nas pontas e converte string vazia em NULL. Com uppercase=true, converte para maiúsculas, para códigos como ticker, UF e tipo de operação."
+    arguments:
+      - name: column_name
+        type: string
+        description: "Nome da coluna a ser limpa."
+      - name: uppercase
+        type: bool
+        description: "Se true, converte o valor para maiúsculas. Padrão false."
