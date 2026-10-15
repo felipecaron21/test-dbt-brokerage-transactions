@@ -4,10 +4,10 @@ WITH source AS (
 
 renamed AS (
     SELECT
-        NULLIF(TRIM(transaction_id), '') AS transaction_id,
-        NULLIF(TRIM(client_id), '') AS client_id,
-        UPPER(TRIM(asset_ticker)) AS asset_ticker,
-        UPPER(TRIM(operation)) AS operation,
+        {{ clean_string('transaction_id') }} AS transaction_id,
+        {{ clean_string('client_id') }} AS client_id,
+        {{ clean_string('asset_ticker', uppercase=true) }} AS asset_ticker,
+        {{ clean_string('operation', uppercase=true) }} AS operation,
         CAST(quantity AS INTEGER) AS quantity,
         CAST(unit_price AS DECIMAL(18, 2)) AS unit_price,
         CAST(transaction_date AS DATE) AS transaction_date
