@@ -1,0 +1,112 @@
+version: 2
+
+models:
+  - name: dim_clients
+    description: "Dimensão de clientes, com um registro por cliente, incluindo clientes sem transações."
+    columns:
+      - name: client_id
+        description: "Identificador único do cliente. Chave primária da dimensão."
+        data_tests:
+          - not_null
+          - unique
+      - name: client_name
+        description: "Nome completo do cliente."
+        data_tests:
+          - not_null
+      - name: city
+        description: "Cidade de residência do cliente."
+      - name: state
+        description: "Sigla da unidade federativa do cliente."
+      - name: created_at
+        description: "Data de cadastro do cliente."
+
+  - name: fact_transactions
+    description: "Tabela fato de transações, com uma linha por transação válida. Materialização incremental controlada por transaction_date."
+    columns:
+      - name: transaction_id
+        description: "Identificador único da transação. Chave primária da fato."
+        data_tests:
+          - not_null
+          - unique
+      - name: transaction_date
+        description: "Data da transação. Coluna de controle da carga incremental."
+        data_tests:
+          - not_null
+      - name: client_id
+        description: "Chave estrangeira para dim_clients."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_clients')
+                field: client_id
+      - name: asset_ticker
+        description: "Código de negociação do ativo na B3."
+        data_tests:
+          - not_null
+      - name: operation
+        description: "Tipo de operação: BUY ou SELL."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['BUY', 'SELL']
+      - name: quantity
+        description: "Quantidade negociada, sempre positiva."
+        data_tests:
+          - positive_value
+      - name: unit_price
+        description: "Preço unitário do ativo, em reais."
+        data_tests:
+          - positive_value
+      - name: gross_amount
+        description: "Valor financeiro bruto da transação, em reais."
+        data_tests:
+          - positive_value
+      - name: signed_quantity
+        description: "Quantidade com sinal: positiva em BUY, negativa em SELL."
+        data_tests:
+          - not_null
+      - name: signed_amount
+        description: "Valor financeiro com sinal: positivo em BUY, negativo em SELL, em reais."
+        data_tests:
+          - not_null
+
+  - name: mart_client_portfolio
+    description: "Posição atual de cada cliente por ativo, consolidando todas as transações. Posição líquida = BUY − SELL, em quantidade e em valor financeiro."
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - client_id
+              - asset_ticker
+    columns:
+      - name: client_id
+        description: "Identificador do cliente."
+        data_tests:
+          - not_null
+      - name: client_name
+        description: "Nome do cliente."
+        data_tests:
+          - not_null
+      - name: asset_ticker
+        description: "Código de negociação do ativo na B3."
+        data_tests:
+          - not_null
+      - name: bought_quantity
+        description: "Quantidade total comprada."
+      - name: sold_quantity
+        description: "Quantidade total vendida."
+      - name: net_quantity
+        description: "Posição líquida em quantidade (comprada − vendida). Valor negativo indica inconsistência, verificada pelo teste singular assert_no_negative_position."
+        data_tests:
+          - not_null
+      - name: bought_amount
+        description: "Valor financeiro total comprado, em reais."
+      - name: sold_amount
+        description: "Valor financeiro total vendido, em reais."
+      - name: net_amount
+        description: "Posição líquida em valor financeiro (comprado − vendido), em reais. Pode ser negativa sem indicar erro, quando o cliente vende com lucro."
+        data_tests:
+          - not_null
+      - name: last_transaction_date
+        description: "Data da última transação do cliente no ativo."
