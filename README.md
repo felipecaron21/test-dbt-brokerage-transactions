@@ -19,8 +19,6 @@ dbt run
 dbt test
 ```
 
-No Windows, ative o ambiente com `.venv\Scripts\Activate.ps1`.
-
 ## Resultado esperado
 
 `dbt test` termina com `PASS=65 WARN=7 ERROR=0`.
