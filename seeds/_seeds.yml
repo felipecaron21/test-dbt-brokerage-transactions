@@ -1,0 +1,109 @@
+version: 2
+
+seeds:
+  - name: transactions
+    description: "Dado bruto de transações de compra e venda de ativos por cliente, carregado do CSV de origem sem tratamento. Contém problemas de qualidade conhecidos, sinalizados pelos testes com severidade warn."
+    columns:
+      - name: transaction_id
+        description: "Identificador da transação na origem."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+          - unique:
+              config:
+                severity: warn
+
+      - name: client_id
+        description: "Identificador do cliente que realizou a transação."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+          - relationships:
+              arguments:
+                to: ref('clients')
+                field: client_id
+              config:
+                severity: warn
+
+      - name: asset_ticker
+        description: "Código de negociação do ativo."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+
+      - name: operation
+        description: "Tipo de operação (BUY / SELL)."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+          - accepted_values:
+              arguments:
+                values: ['BUY', 'SELL']
+              config:
+                severity: warn
+
+      - name: quantity
+        description: "Quantidade de ativos negociada na transação."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+
+      - name: unit_price
+        description: "Preço unitário do ativo na transação."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+
+      - name: transaction_date
+        description: "Data em que a transação foi realizada."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+
+  - name: clients
+    description: "Dado bruto do cadastro de clientes, carregado do CSV de origem sem tratamento. Contém registros duplicados e incompletos, sinalizados pelos testes com severidade warn."
+    columns:
+      - name: client_id
+        description: "Identificador do cliente na origem."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+          - unique:
+              config:
+                severity: warn
+
+      - name: name
+        description: "Nome completo do cliente."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+
+      - name: city
+        description: "Cidade de residência do cliente."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+
+      - name: state
+        description: "Sigla da unidade federativa do cliente."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+
+      - name: created_at
+        description: "Data de cadastro do cliente."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
