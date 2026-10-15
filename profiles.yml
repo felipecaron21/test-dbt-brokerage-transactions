@@ -1,0 +1,7 @@
+brokerage:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: brokerage.duckdb
+      threads: 4
